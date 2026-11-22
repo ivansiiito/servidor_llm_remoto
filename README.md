@@ -17,6 +17,10 @@ Sirve en local, con `llama-server` (llama.cpp), el Qwen3.8-27B oficial en 4 bits
 
 Para pararlo, pulsa Ctrl+C. Si ya hay un ngrok en marcha, el script no abre otro ni lo toca; si lo ha abierto el propio script, lo cierra al salir. Si cierras la ventana con la X en lugar de Ctrl+C, el ngrok puede quedarse abierto.
 
+## Una petición a la vez
+
+El servidor atiende un solo espacio (`-np 1`): si dos proyectos o dos personas piden a la vez, la segunda petición **espera su turno y no da error** (`llama-server` encola las peticiones cuando no hay espacio libre). Así, toda la conversación que se está atendiendo dispone del contexto completo que elijas en el menú, en lugar de la mitad. Contrapartida: si dos conversaciones largas se alternan, el servidor tiene que releer el contexto de cada una cada vez, y al que espera le llega la respuesta más tarde. Los clientes deben tolerar esa espera (la web de `chat_setaloca` espera hasta 120 s).
+
 ## Uso desde otros proyectos
 
 Los mismos valores que con LM Studio: `LM_STUDIO_BASE_URL` (URL de ngrok terminada en `/v1`) y `LM_STUDIO_API_KEY`. El nombre del modelo se ignora. Funcionan el streaming, `reasoning_effort: none` y las respuestas estructuradas (`response_format` con `json_schema`). Sin indicar `reasoning_effort`, el modelo piensa antes de responder.
@@ -25,7 +29,7 @@ Para pedir la LoRA, añade `"lora": [{"id": 0, "scale": 1.0}]` al cuerpo de la p
 
 ## Contexto y velocidad medidos
 
-Con la RTX 5090, caché de contexto en 16 bits y 2 espacios de petición:
+Con la RTX 5090 y la caché de contexto en 16 bits (las mediciones se hicieron con 2 espacios; con 1 la memoria es la misma):
 
 | Contexto | Memoria de GPU | Velocidad |
 |---|---|---|

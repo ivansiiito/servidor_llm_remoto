@@ -120,8 +120,10 @@ if ($conVision -and -not (Test-Path $mmproj)) {
 $Contexto = [Math]::Min($maximo, [Math]::Max($minimo, $Contexto))
 $cache = if ($Contexto -gt $maximoCacheCompleta) { 'q8_0' } else { 'f16' }
 
+# Un solo espacio (-np 1): las peticiones simultáneas esperan su turno, sin error, y la conversación
+# que está atendiendo el servidor dispone de todo el contexto elegido (con -np 2 se partiría a la mitad).
 $argumentos = @(
-    '-m', $modelo, '-c', $Contexto, '-ngl', '99', '-np', '2', '-fit', 'off', '-fa', 'on',
+    '-m', $modelo, '-c', $Contexto, '-ngl', '99', '-np', '1', '-fit', 'off', '-fa', 'on',
     '-ctk', $cache, '-ctv', $cache, '--jinja', '--host', '127.0.0.1', '--port', $puerto,
     '--api-key', $entorno['LM_STUDIO_API_KEY']
 )
