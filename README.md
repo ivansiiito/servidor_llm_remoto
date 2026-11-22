@@ -12,8 +12,8 @@ Sirve en local, con `llama-server` (llama.cpp), el Qwen3.8-27B oficial en 4 bits
 ## Arranque
 
 1. Cierra LM Studio, o al menos su servidor, porque usa el mismo puerto 1234.
-2. Ejecuta `iniciar.bat` y elige con el teclado: flechas arriba y abajo para el contexto (de 8.192 en 8.192), RePág y AvPág para saltos mayores, `L` para activar o quitar la LoRA e Intro para arrancar. Verás una estimación de la memoria de GPU.
-3. Para saltarte el menú: `iniciar.bat -Contexto 65536 -SinLora -SinNgrok -Puerto 1235`.
+2. Ejecuta `iniciar.bat` y elige con el teclado: flechas arriba y abajo para el contexto (de 8.192 en 8.192), RePág y AvPág para saltos mayores, `L` para activar o quitar la LoRA, `V` para activar o quitar la visión (imágenes) e Intro para arrancar. Verás una estimación de la memoria de GPU, con un aviso si puede no caber.
+3. Para saltarte el menú: `iniciar.bat -Contexto 65536 -SinLora -SinVision -SinNgrok -Puerto 1235`.
 
 Para pararlo, pulsa Ctrl+C. Si ya hay un ngrok en marcha, el script no abre otro ni lo toca; si lo ha abierto el propio script, lo cierra al salir. Si cierras la ventana con la X en lugar de Ctrl+C, el ngrok puede quedarse abierto.
 
@@ -35,3 +35,11 @@ Con la RTX 5090, caché de contexto en 16 bits y 2 espacios de petición:
 | 220.000 | 31,8 GB | 22 tok/s (desborda a la RAM) |
 
 Por encima de 200.000 el script comprime la caché a 8 bits, y con 262.144 (el máximo del modelo) sigue a unos 50 tok/s con 27,5 GB. Si hay otro modelo o aplicaciones usando la GPU, baja el contexto. Tener la LoRA cargada pero sin pedirla no ralentiza el resto de peticiones.
+
+## Visión (imágenes)
+
+Con la visión activada (por defecto), el servidor carga también el adaptador `mmproj-Qwen3.8-27B-BF16.gguf` de la carpeta de LM Studio y acepta imágenes en el formato de OpenAI (`{"type": "image_url", "image_url": {"url": "data:image/png;base64,..."}}`). Sin él, el servidor ignora las imágenes (`/props` indica `vision: false`).
+
+- **Memoria medida:** la visión añade unos 1,8 GB de GPU (22,1 GB frente a 20,6 GB con 32.768 de contexto y LoRA). Con contextos muy largos puede no caber: el menú avisa y conviene quitarla con `V` o bajar el contexto.
+- **Coste por imagen:** el logo del Setas (894×1338 píxeles) ocupó unos 1.180 tokens de contexto y se procesó en unos 2 segundos. Una imagen más pequeña ocupa menos.
+- **Con la LoRA:** funciona (la LoRA solo toca las capas de lenguaje), pero se entrenó solo con texto y el estilo del Setas se nota poco al describir imágenes.
