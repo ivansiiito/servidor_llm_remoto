@@ -12,10 +12,10 @@ Sirve en local, con `llama-server` (llama.cpp), el Qwen3.8-27B oficial en 4 bits
 ## Arranque
 
 1. Cierra LM Studio, o al menos su servidor, porque usa el mismo puerto 1234.
-2. Ejecuta `iniciar.bat` y elige con el teclado: flechas arriba y abajo para el contexto (de 8.192 en 8.192), RePág y AvPág para saltos mayores, `L` para activar o quitar la LoRA, `V` para activar o quitar la visión (imágenes) e Intro para arrancar. Verás una estimación de la memoria de GPU, con un aviso si puede no caber.
-3. Para saltarte el menú: `iniciar.bat -Contexto 65536 -SinLora -SinVision -SinNgrok -Puerto 1235`.
+2. Ejecuta `iniciar.bat` y elige con el teclado: flechas arriba y abajo para el contexto (de 8.192 en 8.192), RePág y AvPág para saltos mayores, `L` para activar o quitar la LoRA, `V` para activar o quitar la visión (imágenes), `E` para activar o quitar los embeddings e Intro para arrancar. Verás una estimación de la memoria de GPU, con un aviso si puede no caber.
+3. Para saltarte el menú: `iniciar.bat -Contexto 65536 -SinLora -SinVision -SinEmbeddings -SinNgrok -Puerto 1235`.
 
-Para pararlo, pulsa Ctrl+C. Si ya hay un ngrok en marcha, el script no abre otro ni lo toca; si lo ha abierto el propio script, lo cierra al salir. Si cierras la ventana con la X en lugar de Ctrl+C, el ngrok puede quedarse abierto.
+Para pararlo, pulsa Ctrl+C. Si ya hay un ngrok en marcha, el script no abre otro ni lo toca; si lo ha abierto el propio script, lo cierra al salir. Si cierras la ventana con la X en lugar de Ctrl+C, el ngrok (y, con embeddings, el segundo servidor y el proxy) pueden quedarse abiertos.
 
 ## Una petición a la vez
 
@@ -47,3 +47,12 @@ Con la visión activada (por defecto), el servidor carga también el adaptador `
 - **Memoria medida:** la visión añade unos 1,8 GB de GPU (22,1 GB frente a 20,6 GB con 32.768 de contexto y LoRA). Con contextos muy largos puede no caber: el menú avisa y conviene quitarla con `V` o bajar el contexto.
 - **Coste por imagen:** el logo del Setas (894×1338 píxeles) ocupó unos 1.180 tokens de contexto y se procesó en unos 2 segundos. Una imagen más pequeña ocupa menos.
 - **Con la LoRA:** funciona (la LoRA solo toca las capas de lenguaje), pero se entrenó solo con texto y el estilo del Setas se nota poco al describir imágenes.
+
+## Embeddings (bge-m3)
+
+Con los embeddings activados (por defecto), el servidor atiende también `POST /v1/embeddings` con el modelo `gpustack/bge-m3-GGUF` (Q8_0, descargado por LM Studio en `~/.lmstudio/models`), por el mismo puerto, el mismo túnel y la misma clave. Devuelve vectores de 1.024 números ya normalizados, compatibles con los de `@cf/baai/bge-m3` de Cloudflare Workers AI (coseno de 0,999 entre ambos).
+
+- **Cómo funciona:** bge-m3 corre en un segundo `llama-server` **solo por CPU** (8 hilos, sin memoria de GPU, unos 0,8 GB de RAM) en el puerto `Puerto + 101`, el Qwen pasa al `Puerto + 100` y `proxy.py` (Python sin dependencias, lanzado con `uv run`) atiende el puerto público: manda `/v1/embeddings` a bge-m3 y todo lo demás al Qwen, con el streaming trozo a trozo. Cada petición va en su propio hilo, así que un vector no espera a que termine una respuesta del chat. Los registros de los dos procesos van a `embeddings*.log` y `proxy*.log`.
+- **Sin embeddings** (`E` o `-SinEmbeddings`), el servidor arranca exactamente como antes, sin proxy.
+- **Velocidad medida:** 0,02 s una consulta corta, 0,09 s una tarjeta de unos 300 caracteres y 35 s para 546 tarjetas. Admite textos de hasta 8.192 tokens.
+- **Requisito:** `uv` instalado (descarga un Python la primera vez si no lo hay).
