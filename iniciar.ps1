@@ -16,7 +16,7 @@ $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 $raiz = $PSScriptRoot
 $modelo = 'C:\Users\ivans\.lmstudio\models\lmstudio-community\Qwen3.8-27B-GGUF\Qwen3.8-27B-Q4_K_M.gguf'
-$lora = 'lora/setas-lora-f16.gguf'
+$lora = 'lora/setas-lora-v2-p3-f16.gguf'
 # Adaptador de visión del mismo modelo: sin él, el servidor ignora las imágenes.
 $mmproj = 'C:\Users\ivans\.lmstudio\models\lmstudio-community\Qwen3.8-27B-GGUF\mmproj-Qwen3.8-27B-BF16.gguf'
 # Modelo de embeddings, siempre por CPU: no ocupa memoria de GPU.

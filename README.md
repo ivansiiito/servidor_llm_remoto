@@ -6,7 +6,7 @@ Sirve en local, con `llama-server` (llama.cpp), el Qwen3.8-27B oficial en 4 bits
 
 - Windows con una GPU NVIDIA (probado en una RTX 5090 de 32 GB) y ngrok instalado y con sesión iniciada.
 - El modelo `lmstudio-community/Qwen3.8-27B-GGUF` (Q4_K_M) descargado por LM Studio en `~/.lmstudio/models`.
-- `bin/` con `llama-server.exe` (llama.cpp build 12633 para CUDA 13.5 y sus DLL) y `lora/setas-lora-f16.gguf`. Ambas carpetas están fuera de Git.
+- `bin/` con `llama-server.exe` (llama.cpp build 12633 para CUDA 13.5 y sus DLL) y `lora/setas-lora-v2-p3-f16.gguf` (la LoRA v2 del Setas, que pide la búsqueda de actualidad; la v1, `setas-lora-f16.gguf`, se conserva). Ambas carpetas están fuera de Git.
 - Un `.env` (copia de `.env.example`) con `LM_STUDIO_API_KEY` y `NGROK_DOMINIO`.
 
 ## Arranque
